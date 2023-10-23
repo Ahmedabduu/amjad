@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_monthly_settlements_request_kanban" model="ir.ui.view">
+        <field name="name">monthly.settlements.request.kanban</field>
+        <field name="model">monthly.settlements.request</field>
+        <field name="priority">10</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="id"/>
+                <field name="employee_name" widget="many2many_tags"/>
+                <field name="result"/>
+                <field name="state" widget="badge"/>
+                <field name="type"/>
+                <field name="description"/>
+                <field name="amount_type"/>
+                <field name="num_of_month"/>
+                <field name="total_amount"/>
+                <field name="fixed_field"/>
+                <field name="show_request"/>
+                <field name="current_user_to_approve_request"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record_has_image_fill o_hr_kanban_record">
+                            <div class="oe_kanban_details">
+                                <ul>
+                                    <li>
+                                        <field name="employee_name"/>
+                                    </li>
+                                    <li>
+                                        <field name="result"/>
+                                    </li>
+                                    <li>
+                                        <field name="state"/>
+                                    </li>
+                                    <li>
+                                        <field name="amount_type"/>
+                                    </li>
+                                    <li>
+                                        <field name="show_request"/>
+                                    </li>
+                                    <li>
+                                        <field name="current_user_to_approve_request"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_monthly_settlements_request_tree" model="ir.ui.view">
+        <field name="name">monthly.settlements.request.tree</field>
+        <field name="model">monthly.settlements.request</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="employee_name" widget="many2many_tags"/>
+                <field name="result"/>
+                <field name="state"/>
+                <field name="type"/>
+                <field name="show_request"/>
+                <field name="current_user_to_approve_request"/>
+                <field name="description"/>
+                <field name="amount_type"/>
+                <field name="num_of_month"/>
+                <field name="total_amount"/>
+                <field name="fixed_field"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_monthly_settlements_request_form" model="ir.ui.view">
+        <field name="name">monthly.settlements.request.form</field>
+        <field name="model">monthly.settlements.request</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar"/>
+<!--                    <button name="confirm"  type="object"-->
+<!--                            class="oe_highlight" states="sent" string="Approve m_s_r"-->
+<!--                    />-->
+<!--                    <button name="decline"  type="object"-->
+<!--                            states="sent" string="Decline m_s_r"-->
+<!--                    />-->
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_name" widget="many2many_tags"
+                                   attrs="{'readonly': [('state', '=', 'sent')]}"/>
+                            <field name="result" attrs="{'readonly': [('state', '=', 'sent')]}"/>
+                        </group>
+                        <group>
+                            <field name="state" widget="badge" attrs="{'readonly': [('state', '=', 'sent')]}"/>
+                            <field name="fixed_field" attrs="{'readonly': [('state', '=', 'sent')]}"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_monthly_settlements_request" model="ir.actions.act_window">
+        <field name="name">Monthly Settlements Request</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">monthly.settlements.request</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add a new Monthly Settlements Request
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

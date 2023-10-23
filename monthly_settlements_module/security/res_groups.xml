@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="module_monthly_settlements_approve" model="ir.module.category">
+        <field name="name">Monthly Settlements Approve</field>
+        <field name="description">Helps you manage payroll module extension.</field>
+        <field name="sequence">10</field>
+    </record>
+     <record model="res.groups" id="monthly_settlements_stage_type">
+         <field name="name">payroll order change type</field>
+         <field name="category_id" ref="module_monthly_settlements_approve" />
+     </record>
+
+</odoo>

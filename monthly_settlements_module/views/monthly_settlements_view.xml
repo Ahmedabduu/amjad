@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_monthly_settlements_kanban" model="ir.ui.view">
+        <field name="name">monthly.settlements.kanban</field>
+        <field name="model">monthly.settlements</field>
+        <field name="priority">10</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="id"/>
+                <field name="employee_name" widget="many2many_tags"/>
+                <field name="result"/>
+                <field name="state" widget="badge"/>
+                <field name="type"/>
+                <field name="description"/>
+                <field name="amount_type"/>
+                <field name="num_of_month"/>
+                <field name="total_amount"/>
+                <field name="fixed_field"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record_has_image_fill o_hr_kanban_record">
+                            <div class="oe_kanban_details">
+                                <ul>
+                                    <li>
+                                        <field name="employee_name"/>
+                                    </li>
+                                    <li>
+                                        <field name="result"/>
+                                    </li>
+                                    <li>
+                                        <field name="state"/>
+                                    </li>
+                                    <li>
+                                        <field name="amount_type"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_monthly_settlements_tree" model="ir.ui.view">
+        <field name="name">monthly.settlements.tree</field>
+        <field name="model">monthly.settlements</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="employee_name"/>
+                <field name="type"/>
+                <field name="description"/>
+                <field name="amount_type"/>
+                <field name="total_amount"/>
+                <field name="percentage_of"/>
+                <field name="num_of_month"/>
+                <field name="date"/>
+                <field name="result"/>
+                <field name="fixed_field"/>
+                <field name="total_result"/>
+                <field name="clicked_m_s" invisible="1"/>
+                <field name="percentage"/>
+                <field name="currency_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    <!--    this is for lines -->
+    <record id="view_monthly_settlements_form" model="ir.ui.view">
+        <field name="name">monthly.settlements.form</field>
+        <field name="model">monthly.settlements</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar"/>
+                    <button name="action_create_record" states="draft,sent" string="Compute" type="object"
+                            class="oe_highlight"/>
+                    <button name="action_pass_values" states="draft,sent" string="Validate" type="object"
+                            class="oe_highlight"/>
+                    <button name="confirm"
+                            type="object" string="Approve"
+                            attrs="{'invisible': ['|', ('show', '=', False), ('state', '=', 'cancel')]}"
+                            class="oe_highlight"/>
+                    <button name="decline"
+                            attrs="{'invisible': ['|', ('show', '=', False), ('state', '=', 'cancel')]}"
+                            type="object" string="Decline"/>
+
+                    <button name="action_submit" states="draft" type="object" string="Submit To Approve"
+                            class="oe_highlight"/>
+                    <!--  this is for action submit attrs="{'invisible': [('show', '=', False)]}"                  <field name="state" widget="badge"/>-->
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="employee_name"/>
+                            <field name="type"/>
+                            <field name="description"/>
+                            <field name="input_ref" invisible="1"/>
+                            <field name="amount_type"/>
+                            <field name="currency_id"/>
+                            <field name="current_user_to_approve" invisible="1"/>
+                            <field name="current_user_id" invisible="1"/>
+                            <field name="show" invisible="1"/>
+                            <field name="total_amount"
+                                   attrs="{'invisible': [('amount_type', '=', 'fixed')], 'readonly': True}"/>
+                            <field name="fixed_field" attrs="{'invisible': [('amount_type', '=', 'percentage')]}"/>
+                        </group>
+                        <group>
+                            <field name="percentage_of" attrs="{'invisible': [('amount_type', '=', 'fixed')]}"/>
+                            <field name="percentage" attrs="{'invisible': [('amount_type', '=', 'fixed')]}"/>
+                            <field name="num_of_month"/>
+                            <field name="date"/>
+                            <field name="result"/>
+                            <field name="clicked_m_s" invisible="1"/>
+                            <field name="total_result"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Monthly Settlements Lines" name="monthly_settlement">
+                            <field name="monthly_settlements_lines_ids">
+                                <tree editable="top">
+                                    <field name="date_lines"/>
+                                    <field name="description_lines"/>
+                                    <field name="delay" widget="boolean_toggle"
+                                           attrs="{'invisible': [('delay', '=', True)]}"/>
+                                    <field name="total_amount_lines"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_monthly_settlements" model="ir.actions.act_window">
+        <field name="name">Monthly Settlements</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">monthly.settlements</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+
+            </p>
+        </field>
+    </record>
+    <record id="monthly_settlements_stage_type_action" model="ir.actions.act_window">
+        <field name="name">monthly.settlements.stage.type.action.tree</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">monthly.settlements.stage.type</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="view_monthly_settlements_form_inherit" model="ir.ui.view">
+        <field name="name">monthly.settlements.order.inherit</field>
+        <field name="model">monthly.settlements</field>
+        <field name="inherit_id" ref="monthly_settlements_module.view_monthly_settlements_form"/>
+        <field name="arch" type="xml">
+            <!--            <notebook position="inside">-->
+            <field name="currency_id" position="after">
+                <field name="monthly_settlements_type" invisible="1" widget="selection"/>
+                <!--           monthly_settlements_type  attrs="{'readonly': [('user_is_admin', '=', False)]}"-->
+                <field name="min_range" invisible="0" force_save="1" attrs="{'readonly': True}"/>
+                <field name="max_range" invisible="0" force_save="1" attrs="{'readonly': True}"/>
+                <!--                    <field name="show_pending" invisible="1"/>-->
+                <!--                    <field name="user_is_admin" invisible="1"/>-->
+
+            </field>
+            <field name="state" position="before">
+                <!--                    <button name="action_approve" class="oe_highlight" string="Approve" type="object"/>-->
+                <!--                    attrs="{'invisible':  [('show_pending', '=', False)]}"
+                                        this condition for  action_approve,action_decline
+                -->
+                <!--                    <button name="action_decline" string="Decline" type="object"/>-->
+            </field>
+            <!--            </notebook>-->
+        </field>
+    </record>
+
+
+    <menuitem id="menu_monthly_settlements_root"
+              name="Monthly Settlements"
+              parent="hr_payroll.menu_hr_payroll_payslips"
+              action="action_monthly_settlements"
+              sequence="10"/>
+    <menuitem id="menu_monthly_settlements_type_root"
+              name="Monthly Settlements Type"
+              parent="hr_payroll.menu_hr_payroll_global_settings"
+              action="monthly_settlements_stage_type_action"
+              sequence="10"/>
+
+</odoo>

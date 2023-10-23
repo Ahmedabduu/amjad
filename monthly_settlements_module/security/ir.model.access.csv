@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_monthly_settlements,access.monthly.settlements,model_monthly_settlements,,1,1,1,1,base.group_user,1,1,1,1
+access_monthly_settlements_lines,access.monthly.settlements.lines,model_monthly_settlements_lines,,1,1,1,1,base.group_user,1,1,1,1
+access_monthly_settlements_order_user_pending,access.monthly.settlements.order.user.pending,model_monthly_settlements_order_user_pending,,1,1,1,1,base.group_user,1,1,1,1
+access_monthly_settlements_stage,access.monthly.settlements.stage,model_monthly_settlements_stage,base.group_user,1,1,1,1
+access_monthly_settlements_stage_type,access.monthly.settlements.stage.type,model_monthly_settlements_stage_type,base.group_user,1,1,1,1
