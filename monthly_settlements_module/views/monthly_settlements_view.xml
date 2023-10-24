@@ -75,9 +75,9 @@
                 <header>
                     <field name="state" widget="statusbar"/>
                     <button name="action_create_record" states="draft,sent" string="Compute" type="object"
-                            class="oe_highlight"/>
+                            class="oe_highlight" invisible="1"/>
                     <button name="action_pass_values" states="draft,sent" string="Validate" type="object"
-                            class="oe_highlight"/>
+                            class="oe_highlight" invisible="1"/>
                     <button name="confirm"
                             type="object" string="Approve"
                             attrs="{'invisible': ['|', ('show', '=', False), ('state', '=', 'cancel')]}"

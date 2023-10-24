@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError
 
@@ -28,8 +26,7 @@ class MonthlySettlements(models.Model):
                                     )
     percentage = fields.Float(string='Percentage')
     num_of_month = fields.Integer(
-        string='Number of Months',
-        default=1, required=True
+        string='Number of Months', required=True
     )
     current_user_to_approve = fields.Integer(string='Admin')
     fixed_field = fields.Float(string='Total Amount Fixed')
@@ -37,8 +34,8 @@ class MonthlySettlements(models.Model):
     currency_id = fields.Many2one('res.currency', string='Currency')
     monthly_settlements_lines_ids = fields.One2many('monthly.settlements.lines', 'monthly_settlements_lines_id',
                                                     string="Monthly Settlements Lines")
-    result = fields.Float(string='Result', compute="_compute_result")
-    result_to_type = fields.Float(string='Result', compute="_compute_result")
+    result = fields.Float(string='Result', compute="compute_result", store=True)
+    result_to_type = fields.Float(string='Result', compute="compute_result")
 
     state = fields.Selection(selection=lambda self: self.get_stages(), string='Status',
                              readonly=True, copy=False, index=True, tracking=3, default='draft')
@@ -85,6 +82,12 @@ class MonthlySettlements(models.Model):
     #                 ret = True
     #                 print("show pending ", ret)
     #     self.show_pending = ret
+    @api.onchange('num_of_month')
+    def test_test(self):
+        for rec in self:
+            x = self._context.get('active_id')
+            print("any", x)
+
     """
         def test : 
         Use this method to check if res is within the domain or not    
@@ -142,20 +145,20 @@ class MonthlySettlements(models.Model):
                                                                                          ('status', '=', 'approve')])
         current_stage = self.env['monthly.settlements.stage'].sudo().search([('code', '=', self.state)], limit=1)
 
-        print("monthely type ", self.monthly_settlements_type)
-        print("monthely type stage ", self.monthly_settlements_type.stages)
+        # print("monthely type ", self.monthly_settlements_type)
+        # print("monthely type stage ", self.monthly_settlements_type.stages)
         newlist = sorted(self.monthly_settlements_type.stages, key=lambda x: x.stage_order)
-        print("new list ", newlist)
-        print("current stage is  ", current_stage)
-        print("count approve stage is  ", count_approve)
+        # print("new list ", newlist)
+        # print("current stage is  ", current_stage)
+        # print("count approve stage is  ", count_approve)
 
         if len(current_stage.stage_users) == count_approve:
-            print("current is ", current_stage.code)
-            print("current is ", current_stage.stage_users)
-            print("current is ", current_stage.stage_users)
+            # print("current is ", current_stage.code)
+            # print("current is ", current_stage.stage_users)
+            # print("current is ", current_stage.stage_users)
             if current_stage.code == newlist[len(newlist) - 1].code:
-                print("################")
-
+                # print("################")
+                #
                 print("from here 1 ")
                 salary_slips_to_pay = self.env['hr.payslip'].search([
                     ("employee_id", "=", self.employee_name.ids),
@@ -171,11 +174,11 @@ class MonthlySettlements(models.Model):
 
                 # super(MonthlySettlements, self).action_submit()
             else:
-                print("$$$$$$$$$$$$$$$$$$$")
+                # print("$$$$$$$$$$$$$$$$$$$")
                 for x in range(0, len(newlist) - 1):
                     if newlist[x].code == current_stage.code:
                         self.state = newlist[x + 1].code
-                        print("state is sssssss", self.state)
+                        # print("state is sssssss", self.state)
                         current_stage = self.env['monthly.settlements.stage'].sudo().search([('code', '=', self.state)],
                                                                                             limit=1)
                         uorder = 0
@@ -224,7 +227,7 @@ class MonthlySettlements(models.Model):
     def find_next_user(self):
         # Define logic to find the next user who should approve
         # You can use user_order or any other criteria
-        print("find next ")
+        # print("find next ")
         next_rec = self.env['monthly.settlements.order.user.pending'].search([
             ('state', '=', self.state),
             ('monthly_settlements_id', '=', self.id),
@@ -243,7 +246,7 @@ class MonthlySettlements(models.Model):
     @api.depends('current_user_id')
     def compute_show(self):
         for rec in self:
-            print(f"current_user_id: {rec.current_user_id}, logged-in user: {self.env.user}")
+            # print(f"current_user_id: {rec.current_user_id}, logged-in user: {self.env.user}")
             rec.show = rec.current_user_id == self.env.user
 
     def get_stages(self):
@@ -272,14 +275,14 @@ class MonthlySettlements(models.Model):
         return res
 
     # this is to increase date in lines
-    @api.onchange('date')
-    def _onchange_date(self):
-        for rec in self:
-            if rec.date:
-                current_date = fields.Date.from_string(rec.date)
-                for line in rec.monthly_settlements_lines_ids:
-                    line.date_lines = fields.Date.to_string(current_date)
-                    current_date += relativedelta(months=1)
+    # @api.onchange('date')
+    # def onchange_date(self):
+    #     for rec in self:
+    #         if rec.date:
+    #             current_date = fields.Date.from_string(rec.date)
+    #             for line in rec.monthly_settlements_lines_ids:
+    #                 line.date_lines = fields.Date.to_string(current_date)
+    #                 current_date += relativedelta(months=1)
 
     # this is to add default text in description
     @api.model
@@ -315,7 +318,7 @@ class MonthlySettlements(models.Model):
             if self.state in ('draft', 'sent'):
                 print("action submit ", self.monthly_settlements_type)
                 newlist = sorted(self.monthly_settlements_type.stages, key=lambda x: x.stage_order)
-                print("action submit ", newlist, newlist)
+                # print("action submit ", newlist, newlist)
                 self.state = newlist[0].code
                 # print("state is  ", self.state, "id for stage", newlist)
                 # for rec in self:
@@ -376,11 +379,11 @@ class MonthlySettlements(models.Model):
             stages = self.env["monthly.settlements.stage.type"].search([('min_range', '=', self.min_range)])
             if stages:
                 if self.state in ('draft', 'sent'):
-                    print("action submit 1  ")
+                    # print("action submit 1  ")
                     newlist = sorted(stages.stages, key=lambda x: x.stage_order)
-                    print("action submit 1  ", newlist)
+                    # print("action submit 1  ", newlist)
                     self.state = newlist[0].code
-                    print("stateee in elseee ----- :", self.state)
+                    # print("stateee in elseee ----- :", self.state)
                     # print("state is  ", self.state, "id for stage", newlist)
                     # for rec in self:
                     #     # print("submit in for ")
@@ -395,7 +398,7 @@ class MonthlySettlements(models.Model):
                     #         uorder = 0
                     current_stage = self.env['monthly.settlements.stage'].sudo().search([('code', '=', self.state)],
                                                                                         limit=1)
-                    print("current stage is ", current_stage)
+                    # print("current stage is ", current_stage)
                     uorder = 0
                     rec_id = self.env['ir.model'].sudo().search([('model', '=', 'monthly.settlements')], limit=1)
                     # print(rec_id)
@@ -448,14 +451,29 @@ class MonthlySettlements(models.Model):
     """
 
     @api.depends('amount_type', 'total_amount', 'num_of_month', 'percentage')
-    def _compute_result(self):
+    def compute_result(self):
         for rec in self:
             result = 0  # Default value
-            if rec.amount_type == 'percentage':
-                result = rec.total_amount / rec.num_of_month
-            elif rec.amount_type == 'fixed':
-                result = rec.fixed_field / rec.num_of_month
-            rec.result = result
+            if rec.num_of_month != 0:
+                if rec.amount_type == 'percentage':
+                    result = rec.total_amount / rec.num_of_month
+                elif rec.amount_type == 'fixed':
+                    result = rec.fixed_field / rec.num_of_month
+                rec.result = result
+                if rec.num_of_month:
+                    num_of_lines = len(rec.monthly_settlements_lines_ids)
+                    lines = rec.monthly_settlements_lines_ids
+                    new_num_of_month = rec.num_of_month
+                    current_date = rec.date or fields.Date.today()
+                    print("current number of lines", num_of_lines)
+                    print("new number of month", new_num_of_month)
+                    print("current date", current_date)
+                    print("lines", lines)
+                    if num_of_lines < new_num_of_month:
+                        lines_to_create = new_num_of_month - num_of_lines
+                        print("line we have to create", lines_to_create)
+                        x = rec.env['monthly.settlements.lines'].search([('num_of_month'),'>',('len(rec.monthly_settlements_lines_ids)')])
+                        print(x)
 
     """ 
         def compute_total_result: 
@@ -515,6 +533,7 @@ class MonthlySettlements(models.Model):
                 ("employee_id", "=", self.employee_name.id),
                 ("state", "=", "verify")], limit=1)
             total_amount = sum(rec.monthly_settlements_lines_ids.mapped('total_amount_lines'))
+            # print("total", total_amount/rec.num_of_month)
             description = rec.description
             new_lines = [({
                 'payslip_id': salary_slips_to_pay.id,
@@ -524,10 +543,13 @@ class MonthlySettlements(models.Model):
                 'sequence': 10,
             })]
             obj_input = self.env['hr.payslip.input']
-            if not rec.input_ref:
+
+            if rec.input_ref:
+                # print("if")
                 action = obj_input.create(new_lines)
             else:
                 rec.unlink_last_record(rec.input_ref)
+                # print("else",rec.unlink_last_record(rec.input_ref))
                 action = obj_input.create(new_lines)
             rec.write({'input_ref': action.id})
 
@@ -540,7 +562,7 @@ class MonthlySettlements(models.Model):
                 # ('date_from', '<=', rec.date),
                 # ('date_to', '>=', rec.date)
             ])
-            print("all we have in to pay", salary_slips_to_pay)
+            # print("all we have in to pay", salary_slips_to_pay)
 
             for payslip in salary_slips_to_pay:
                 mo = self.env['monthly.settlements'].search([("employee_name", "=", self.employee_name.id),
@@ -552,21 +574,21 @@ class MonthlySettlements(models.Model):
                                                              ])
                 type_totals = {}
                 for mo_record in mo:
-                    print("moo is ", mo_record)
+                    # print("moo is ", mo_record)
                     for line in mo_record.monthly_settlements_lines_ids:
-                        print("date", line.date_lines, payslip.date_from, payslip.date_to)
+                        # print("date", line.date_lines, payslip.date_from, payslip.date_to)
                         if mo_record.type.id in type_totals:
                             if payslip.date_from <= line.date_lines <= payslip.date_to:
-                                print("###################", type_totals)
+                                # print("###################", type_totals)
                                 # If it is, add the total_amount_lines to the existing sum
                                 type_totals[mo_record.type.id] += line.total_amount_lines
-                                print("type total >>>>>>>>>>>>>>>>>>>", type_totals)
+                                # print("type total >>>>>>>>>>>>>>>>>>>", type_totals)
                         else:
-                            print("@@@@@@@@@@@@@@@@@@@@@")
+                            # print("@@@@@@@@@@@@@@@@@@@@@")
                             # If it's not, initialize the sum with the current total_amount_lines
                             type_totals[mo_record.type.id] = line.total_amount_lines
 
-                        print("typeee --------------", type_totals)
+                        # print("typeee --------------", type_totals)
                 for type_id, total_amount in type_totals.items():
                     for contract in payslip.contract_id:
                         for lines in rec.monthly_settlements_lines_ids:
@@ -581,7 +603,7 @@ class MonthlySettlements(models.Model):
                                 }])
                                 payslip.env['hr.payslip.input'].create(x)
 
-                    print("monthley adjustment is ", total_amount)
+                    # print("monthley adjustment is ", total_amount)
                     # self.state='done'
 
         # print(" payslip is ", payslip)
@@ -747,13 +769,13 @@ class MonthlySettlements(models.Model):
                                                                                          , ('status', '=', 'queue')]
                                                                                      , order='user_order'
                                                                                      , limit=1)
-                print("rec next is--------> ", rec_next)
+                # print("rec next is--------> ", rec_next)
                 if rec_next:
                     rec_next[0].update({'status': 'waiting'})
                 rec_id = self.env['ir.model'].sudo().search([('model', '=', 'monthly.settlements')], limit=1)
-                print(" user id in rec next is ", rec_next.user.id)
+                # print(" user id in rec next is ", rec_next.user.id)
                 if rec_next.user.id:
-                    print("i am heeereerererererrerererer354657890-----------------------------", rec_next)
+                    # print("i am heeereerererererrerererer354657890-----------------------------", rec_next)
                     x = self.env['mail.activity'].sudo().create({
                         'activity_type_id': 4,
                         'date_deadline': date.today(),
@@ -762,7 +784,7 @@ class MonthlySettlements(models.Model):
                         'res_model_id': rec_id.id,
                         'res_id': self.id
                     })
-                    print("rec nextttt --------", rec_next)
+                    # print("rec nextttt --------", rec_next)
                 if rec_next.status == False:
                     print("exxxxxxittt")
 
@@ -799,3 +821,9 @@ class MonthlySettlements(models.Model):
         if rec:
             rec[0].update({'status': 'decline'})
             self.state = 'cancel'
+
+    @api.onchange('result')
+    def update_total_amount_lines(self):
+        for record in self:
+            for line in record.monthly_settlements_lines_ids:
+                line.total_amount_lines = record.result
