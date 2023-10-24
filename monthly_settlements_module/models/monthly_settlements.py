@@ -450,6 +450,37 @@ class MonthlySettlements(models.Model):
         We used the function to compute result field
     """
 
+    def unlink_line_if_found(self, vals):
+        for rec in self:
+            for line in rec.monthly_settlements_lines_ids:
+                line.unlink()
+            rec.create_record(vals)
+
+    def action_calculate(self):
+        for rec in self:
+            vals = {
+                'employee_name': self.employee_name.id,
+                'type': self.type.id,
+                'description': self.description,
+                'amount_type': self.amount_type,
+                'percentage_of': False,
+                'percentage': self.percentage,
+                'num_of_month': self.num_of_month,
+                'current_user_to_approve': self.current_user_to_approve,
+                'fixed_field': self.fixed_field,
+                'date': self.date,
+                'currency_id': self.currency_id.id,
+                'min_range': self.min_range,
+                'max_range': self.max_range,
+                'clicked_m_s': self.clicked_m_s,
+                'current_user_id': self.current_user_id.id,
+                'input_ref': self.input_ref.id
+            }
+            if not rec.monthly_settlements_lines_ids:
+                rec.create_record(vals)
+            else:
+                res = rec.unlink_line_if_found(vals)
+
     @api.depends('amount_type', 'total_amount', 'num_of_month', 'percentage')
     def compute_result(self):
         for rec in self:
@@ -465,15 +496,8 @@ class MonthlySettlements(models.Model):
                     lines = rec.monthly_settlements_lines_ids
                     new_num_of_month = rec.num_of_month
                     current_date = rec.date or fields.Date.today()
-                    print("current number of lines", num_of_lines)
-                    print("new number of month", new_num_of_month)
-                    print("current date", current_date)
-                    print("lines", lines)
                     if num_of_lines < new_num_of_month:
                         lines_to_create = new_num_of_month - num_of_lines
-                        print("line we have to create", lines_to_create)
-                        x = rec.env['monthly.settlements.lines'].search([('num_of_month'),'>',('len(rec.monthly_settlements_lines_ids)')])
-                        print(x)
 
     """ 
         def compute_total_result: 
@@ -490,31 +514,21 @@ class MonthlySettlements(models.Model):
                 total_result1 = rec.fixed_field
             rec.total_result = total_result1
 
-    @api.model
-    def create(self, vals):
+    def create_record(self, vals):
         for record in self:
-            if record.employee_name:
-                rule = self.env['hr.salary.rule'].search(
-                    [('employee_name', '=', self.employee_name.ids)])
-        if 'date' in vals and 'num_of_month' in vals:
-            current_date = vals['date']
-            # vals['sent'] = 'sent'
-            res = super(MonthlySettlements, self).create(vals)
-            total_amount_per_month = res.result
-            for i in range(vals['num_of_month']):
-                self.env['monthly.settlements.lines'].create({
-                    'date_lines': current_date,
-                    'description_lines': res.description,
-                    'total_amount_lines': total_amount_per_month,
-                    # 'delay': 0,
-                    'monthly_settlements_lines_id': res.id,
-                })
-                current_date = fields.Date.to_string(
-                    fields.Date.from_string(current_date) + relativedelta(months=1))
-        else:
-            # vals['state'] = 'sent'
-            res = super(MonthlySettlements, self).create(vals)
-        return res
+            if 'date' in vals and 'num_of_month' in vals:
+                current_date = vals['date']
+                # vals['sent'] = 'sent'
+                for i in range(vals['num_of_month']):
+                    self.env['monthly.settlements.lines'].create({
+                        'date_lines': current_date,
+                        'description_lines': record.description,
+                        'total_amount_lines': record.result,
+                        # 'delay': 0,
+                        'monthly_settlements_lines_id': record.id,
+                    })
+                    current_date = fields.Date.to_string(
+                        fields.Date.from_string(current_date) + relativedelta(months=1))
 
     input_ref = fields.Many2one(
         comodel_name='hr.payslip.input',
